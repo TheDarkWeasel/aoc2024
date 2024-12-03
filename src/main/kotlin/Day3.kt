@@ -25,8 +25,41 @@ class Day3 {
 
     fun solvePart2() {
         val inputs = this::class.java.getResource("day3_1.txt")?.let { readFile(it.toURI()) }
+        val mulRegex = "mul\\(\\d{1,3},\\d{1,3}\\)".toRegex()
+        val doRegex = "do\\(\\)".toRegex()
+        val dontRegex = "don't\\(\\)".toRegex()
 
-        //println("Day3 Part2: $safeCount")
+        var result = 0
+
+        var complete = ""
+
+        inputs?.forEach { line ->
+            complete += line
+        }
+
+        val muls = mulRegex.findAll(complete).toList()
+
+        muls.filter { mul ->
+            val before = complete.substring(0, mul.range.first)
+            val dontsBeforeMul = dontRegex.findAll(before)
+            val dosBeforeMul = doRegex.findAll(before)
+
+            if (dosBeforeMul.count() == 0 && dontsBeforeMul.count() > 0)
+                false
+            else if (dosBeforeMul.count() > 0 && dontsBeforeMul.count() == 0)
+                true
+            else if (dosBeforeMul.count() == 0 && dontsBeforeMul.count() == 0)
+                true
+            else
+                dosBeforeMul.last().range.last > dontsBeforeMul.last().range.last
+        }.forEach { enabled ->
+            val firstNumber = enabled.value.substringAfter("mul(").substringBefore(",").toInt()
+            val secondNumber = enabled.value.substringAfter(",").substringBefore(")").toInt()
+
+            result += firstNumber * secondNumber
+        }
+
+        println("Day3 Part2: $result")
     }
 
     private fun readFile(fileName: URI): List<String> = File(fileName).readLines()
