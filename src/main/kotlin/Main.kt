@@ -10,4 +10,6 @@ fun main() {
 
     Day4().solvePart1()
     Day4().solvePart2()
+
+    Day5().solvePart1()
 }
