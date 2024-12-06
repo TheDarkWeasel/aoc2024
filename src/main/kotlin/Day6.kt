@@ -51,6 +51,57 @@ class Day6 {
         println("Day6 Part1: $result")
     }
 
+    private fun isCaughtInLoop(
+        obstaclePositionX: Int,
+        obstaclePositionY: Int,
+        inputs: List<String>
+    ): Boolean {
+        val matrix = inputs.map { it.toCharArray().toList().toMutableList() }.toMutableList()
+
+        if (matrix[obstaclePositionY][obstaclePositionX] == '#' || matrix[obstaclePositionY][obstaclePositionX] == '^') {
+            return false
+        }
+
+        matrix[obstaclePositionY][obstaclePositionX] = '#'
+
+        println("Obstacle at: $obstaclePositionX, $obstaclePositionY")
+
+        var guardX = 0
+        var guardY = 0
+
+        for (y in matrix.indices) {
+            for (x in matrix[y].indices) {
+                if (matrix[y][x] == '^') {
+                    guardX = x
+                    guardY = y
+                }
+            }
+        }
+
+        var currentDirection = Direction.Up
+
+        val maxTries = 1000000
+
+        try {
+            for (i in 0..maxTries) {
+                var nextX = guardX + currentDirection.x
+                var nextY = guardY + currentDirection.y
+                while (matrix[nextY][nextX] != '#') {
+                    guardX = nextX
+                    guardY = nextY
+                    matrix[guardY][guardX] = 'X'
+                    nextX = guardX + currentDirection.x
+                    nextY = guardY + currentDirection.y
+                }
+                currentDirection = currentDirection.nextDirection()
+            }
+        } catch (e: IndexOutOfBoundsException) {
+            return false
+        }
+
+        return true
+    }
+
     private fun printMatrix(matrix: List<List<Char>>) {
         for (y in matrix.indices) {
             println()
@@ -62,10 +113,20 @@ class Day6 {
     }
 
     fun solvePart2() {
-        val inputs = this::class.java.getResource("day6_1.txt")?.let { readFile(it.toURI()) }
+        val inputs = this::class.java.getResource("day6_1.txt")?.let { readFile(it.toURI()) }!!
+        val matrix = inputs.map { it.toCharArray().toList().toMutableList() }.toMutableList()
 
+        var result = 0
 
-        //println("Day6 Part2: $result")
+        for (y in matrix.indices) {
+            for (x in matrix[y].indices) {
+                if (isCaughtInLoop(x, y, inputs)) {
+                    result++
+                }
+            }
+        }
+
+        println("Day6 Part2: $result")
     }
 
     private fun readFile(fileName: URI): List<String> = File(fileName).readLines()
