@@ -6,6 +6,25 @@ class Day7 {
     fun solvePart1() {
         val inputs = this::class.java.getResource("day7_1.txt")?.let { readFile(it.toURI()) }!!
 
+        val validOperators = listOf(Oparator.Add, Oparator.Multiply)
+        val result = solve(inputs, validOperators)
+
+        println("Day7 Part1: $result")
+    }
+
+    fun solvePart2() {
+        val inputs = this::class.java.getResource("day7_1.txt")?.let { readFile(it.toURI()) }!!
+
+        val validOperators = Oparator.entries
+        val result = solve(inputs, validOperators)
+
+        println("Day7 Part2: $result")
+    }
+
+    private fun solve(
+        inputs: List<String>,
+        validOperators: List<Oparator>
+    ): Long {
         // one line looks like this: "7628244: 4 6 99 4 321"
         val equations = inputs.map { line ->
             val (result, numbers) = line.split(": ")
@@ -14,15 +33,14 @@ class Day7 {
 
         val result = equations.filter {
             val operatorList = MutableList(it.numbers.size) { Oparator.Add }
-            isValidEquation(it, operatorList, 0)
+            isValidEquation(it, validOperators, operatorList, 0)
         }.fold(0L) { acc, equation -> acc + equation.result }
-
-
-        println("Day7 Part1: $result")
+        return result
     }
 
     private fun isValidEquation(
         equation: Equation,
+        validOperators: List<Oparator>,
         operatorList: MutableList<Oparator>,
         operatorToFlip: Int
     ): Boolean {
@@ -30,13 +48,13 @@ class Day7 {
             return true
         }
 
-        for (op in Oparator.entries) {
+        for (op in validOperators) {
             operatorList[operatorToFlip] = op
             if (checkSolution(equation, operatorList)) {
                 return true
             } else {
                 if (operatorToFlip < operatorList.size - 1) {
-                    if (isValidEquation(equation, operatorList, operatorToFlip + 1))
+                    if (isValidEquation(equation, validOperators, operatorList, operatorToFlip + 1))
                         return true
                 }
             }
@@ -57,16 +75,11 @@ class Day7 {
             when (op) {
                 Oparator.Add -> result += num2
                 Oparator.Multiply -> result *= num2
+                Oparator.Concat -> result = (result.toString() + num2.toString()).toLong()
             }
         }
 
         return result == equation.result
-    }
-
-    fun solvePart2() {
-        val inputs = this::class.java.getResource("day6_1.txt")?.let { readFile(it.toURI()) }!!
-
-        //println("Day7 Part2: $result")
     }
 
     private fun readFile(fileName: URI): List<String> = File(fileName).readLines()
@@ -76,5 +89,6 @@ class Day7 {
     private enum class Oparator {
         Add,
         Multiply,
+        Concat,
     }
 }

@@ -18,4 +18,5 @@ fun main() {
     //Day6().solvePart2()
 
     Day7().solvePart1()
+    Day7().solvePart2()
 }
